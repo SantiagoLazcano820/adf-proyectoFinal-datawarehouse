@@ -16,14 +16,42 @@
 				"fileName": "segip_personas.csv",
 				"container": "bronze"
 			},
-			"columnDelimiter": ",",
+			"columnDelimiter": ";",
 			"escapeChar": "\\",
 			"firstRowAsHeader": true,
 			"quoteChar": "\""
 		},
 		"schema": [
 			{
-				"name": "CI;Nombres;Ap. Paterno;Ap. Materno;Fecha Nac.;Género;Estado Civil;Municipio",
+				"name": "CI",
+				"type": "String"
+			},
+			{
+				"name": "Nombres",
+				"type": "String"
+			},
+			{
+				"name": "Ap. Paterno",
+				"type": "String"
+			},
+			{
+				"name": "Ap. Materno",
+				"type": "String"
+			},
+			{
+				"name": "Fecha Nac.",
+				"type": "String"
+			},
+			{
+				"name": "Género",
+				"type": "String"
+			},
+			{
+				"name": "Estado Civil",
+				"type": "String"
+			},
+			{
+				"name": "Municipio",
 				"type": "String"
 			}
 		]
