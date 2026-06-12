@@ -28,7 +28,7 @@
 				"type": "varchar"
 			},
 			{
-				"name": "fecha_nac",
+				"name": "fecha_nacimiento",
 				"type": "varchar"
 			},
 			{
@@ -40,7 +40,35 @@
 				"type": "varchar"
 			},
 			{
-				"name": "municipio",
+				"name": "ci_conyuge",
+				"type": "varchar"
+			},
+			{
+				"name": "numero_hijos",
+				"type": "varchar"
+			},
+			{
+				"name": "ci_padre",
+				"type": "varchar"
+			},
+			{
+				"name": "ci_madre",
+				"type": "varchar"
+			},
+			{
+				"name": "profesion",
+				"type": "varchar"
+			},
+			{
+				"name": "nivel_estudios",
+				"type": "varchar"
+			},
+			{
+				"name": "municipio_residencia",
+				"type": "varchar"
+			},
+			{
+				"name": "fecha_emision",
 				"type": "varchar"
 			}
 		],
