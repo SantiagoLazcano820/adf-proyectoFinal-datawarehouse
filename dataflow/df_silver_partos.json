@@ -1,0 +1,88 @@
+{
+	"name": "df_silver_partos",
+	"properties": {
+		"folder": {
+			"name": "silver"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "bronze_bja_partos",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "silver_partos",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          parto_id as string,",
+				"          ci_madre as string,",
+				"          ci_recien_nacido as string,",
+				"          establecimiento_id as string,",
+				"          fecha_parto as string,",
+				"          tipo_parto as string,",
+				"          peso_nacimiento_kg as string,",
+				"          talla_nacimiento_cm as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT \\n    TRIM(parto_id) AS parto_id,\\n    TRIM(ci_madre) AS ci_madre,\\n    TRIM(ci_recien_nacido) AS ci_recien_nacido,\\n    TRIM(establecimiento_id) AS establecimiento_id,\\n    TRIM(fecha_parto) AS fecha_parto,\\n    TRIM(tipo_parto) AS tipo_parto,\\n    TRIM(peso_nacimiento_kg) AS peso_nacimiento_kg,\\n    TRIM(talla_nacimiento_cm) AS talla_nacimiento_cm\\nFROM bronze.tbl_bja_partos\\nWHERE parto_id IS NOT NULL AND TRIM(parto_id) <> \\'\\'',",
+				"     format: 'query') ~> source1",
+				"source1 derive(parto_id = toInteger(parto_id),",
+				"          establecimiento_id = toInteger(establecimiento_id),",
+				"          fecha_parto = coalesce(    toDate(fecha_parto, 'yyyy-MM-dd'),         toDate(fecha_parto, 'dd/MM/yyyy'),         toDate(fecha_parto, 'MM-dd-yyyy'),         toDate(fecha_parto, 'yyyy/MM/dd'),        toDate(fecha_parto, \"dd 'de' MMMM 'de' yyyy\"),    toDate('1900-01-01', 'yyyy-MM-dd')),",
+				"          peso_nacimiento_kg = toDecimal(regexReplace(toString(peso_nacimiento_kg), '[^0-9.]', '')),",
+				"          talla_nacimiento_cm = toDecimal(regexReplace(toString(talla_nacimiento_cm), '[^0-9.]', '')),",
+				"          tipo_parto = case(     in(['natural', 'nattural', 'ntural', 'naturl', 'nautral'], lower(trim(toString(tipo_parto)))), 'Natural',     in(['cesárea', 'cesarea', 'cessárea', 'cesárae', 'cesárrea', 'ceárea'], lower(trim(toString(tipo_parto)))), 'Cesárea',     in(['null', ''], lower(trim(toString(tipo_parto)))), 'No Registrado',     'No Registrado' )) ~> derivedColumn1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          parto_id as integer,",
+				"          ci_madre as string,",
+				"          ci_recien_nacido as string,",
+				"          establecimiento_id as integer,",
+				"          fecha_parto as date,",
+				"          tipo_parto as string,",
+				"          peso_nacimiento_kg as decimal(6,2),",
+				"          talla_nacimiento_cm as decimal(6,2),",
+				"          fecha_carga as timestamp",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          parto_id,",
+				"          ci_madre,",
+				"          ci_recien_nacido,",
+				"          establecimiento_id,",
+				"          fecha_parto,",
+				"          tipo_parto,",
+				"          peso_nacimiento_kg,",
+				"          talla_nacimiento_cm",
+				"     )) ~> sink1"
+			]
+		}
+	}
+}
