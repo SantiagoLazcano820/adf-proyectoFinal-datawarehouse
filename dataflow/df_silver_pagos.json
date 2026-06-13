@@ -50,7 +50,7 @@
 				"          fecha_pago = coalesce(    toDate(fecha_pago, 'yyyy-MM-dd'),         toDate(fecha_pago, 'dd/MM/yyyy'),         toDate(fecha_pago, 'MM-dd-yyyy'),         toDate(fecha_pago, 'yyyy/MM/dd'),        toDate(fecha_pago, \"dd 'de' MMMM 'de' yyyy\"),    toDate('1900-01-01', 'yyyy-MM-dd')),",
 				"          canal_pago = case(     in(['banco unión', 'banco union', 'banco unin', 'banco uunión', 'banco uunion'], lower(trim(toString(canal_pago)))), 'Banco Unión',     in(['pago móvil', 'pago movil', 'pgo móvil', 'pgo movil'], lower(trim(toString(canal_pago)))), 'Pago Móvil',     in(['transferencia bancaria', 'transferencia'], lower(trim(toString(canal_pago)))), 'Transferencia Bancaria',     iifNull(canal_pago, 'No Identificado', initCap(trim(toString(canal_pago)))) ),",
 				"          estado_pago = case(     in(['pagado', 'pago'], lower(trim(toString(estado_pago)))), 'Pagado',     in(['pendiente'], lower(trim(toString(estado_pago)))), 'Pendiente',     'Pendiente'  ),",
-				"          ci_beneficiaria = regexReplace(trim(ci_beneficiaria), '-', ''),",
+				"          ci_beneficiaria = regexReplace(upper(regexReplace(toString(ci_beneficiaria), '[^a-zA-Z0-9]', '')), '^([A-Z]{2})([0-9]+)$', '$2$1'),",
 				"          nro_comprobante = iif(",
 				"    isNull(nro_comprobante) || toString(nro_comprobante) == 'NULL' || trim(toString(nro_comprobante)) == '',",
 				"    iif(estado_pago == 'Pendiente', 'Sin Emisión', 'No Registrado'),",
