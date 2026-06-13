@@ -1,0 +1,96 @@
+{
+	"name": "df_silver_controles_pediatricos",
+	"properties": {
+		"folder": {
+			"name": "silver"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "bronze_bja_controles_pediatricos",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "silver_controles_pediatricos",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          control_pediatrico_id as string,",
+				"          ci_nino as string,",
+				"          ci_madre as string,",
+				"          establecimiento_id as string,",
+				"          nro_control as string,",
+				"          fecha_control as string,",
+				"          peso_nino_kg as string,",
+				"          talla_nino_cm as string,",
+				"          vacuna_aplicada as string,",
+				"          resultado as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT \\n    TRIM(control_pediatrico_id) AS control_pediatrico_id,\\n    TRIM(ci_nino) AS ci_nino,\\n    TRIM(ci_madre) AS ci_madre,\\n    TRIM(establecimiento_id) AS establecimiento_id,\\n    TRIM(nro_control) AS nro_control,\\n    TRIM(fecha_control) AS fecha_control,\\n    TRIM(peso_nino_kg) AS peso_nino_kg,\\n    TRIM(talla_nino_cm) AS talla_nino_cm,\\n    TRIM(vacuna_aplicada) AS vacuna_aplicada,\\n    TRIM(resultado) AS resultado\\nFROM bronze.tbl_bja_controles_pediatricos\\nWHERE control_pediatrico_id IS NOT NULL AND TRIM(control_pediatrico_id) <> \\'\\'',",
+				"     format: 'query') ~> source1",
+				"source1 derive(control_pediatrico_id = toInteger(control_pediatrico_id),",
+				"          establecimiento_id = toInteger(establecimiento_id),",
+				"          nro_control = toInteger(nro_control),",
+				"          fecha_control = coalesce(    toDate(fecha_control, 'yyyy-MM-dd'),         toDate(fecha_control, 'dd/MM/yyyy'),         toDate(fecha_control, 'MM-dd-yyyy'),         toDate(fecha_control, 'yyyy/MM/dd'),        toDate(fecha_control, \"dd 'de' MMMM 'de' yyyy\"),    toDate('1900-01-01', 'yyyy-MM-dd')),",
+				"          peso_nino_kg = toDecimal(peso_nino_kg),",
+				"          talla_nino_cm = toDecimal(talla_nino_cm),",
+				"          vacuna_aplicada = case(     isNull(vacuna_aplicada) || lower(trim(toString(vacuna_aplicada))) == 'null', 'No Registrado',     in(['bcg', 'bcg '], lower(trim(vacuna_aplicada))), 'BCG',     in(['pentavalente 1ra dosis', 'penttavalente 1ra dosis'], lower(trim(vacuna_aplicada))), 'Pentavalente 1ra Dosis',     in(['pentavalente 2da dosis', 'pentavalente 2da dossis', 'pentavvalente 2da dosis'], lower(trim(vacuna_aplicada))), 'Pentavalente 2da Dosis',     in(['pentavalente 3ra dosis', 'pentavalente 3ra dossis'], lower(trim(vacuna_aplicada))), 'Pentavalente 3ra Dosis',     in(['srp 1ra dosis', 'srp 1ra doiss', 'srp 1ar dosis', 'srp 1ra dosis '], lower(trim(vacuna_aplicada))), 'SRP 1ra Dosis',     in(['antipolio 1ra dosis', 'antipolio 1ra dossis'], lower(trim(vacuna_aplicada))), 'Antipolio 1ra Dosis',     in(['antipolio 2da dosis', 'antipolio 2da dossis'], lower(trim(vacuna_aplicada))), 'Antipolio 2da Dosis',     in(['rotavirus 1ra dosis', 'rotavirus 1ra dossis'], lower(trim(vacuna_aplicada))), 'Rotavirus 1ra Dosis',     initCap(trim(vacuna_aplicada)) ),",
+				"          resultado = case(     isNull(resultado) || lower(trim(toString(resultado))) == 'null', 'No Registrado',     in(['normal', 'norml', 'normal ', 'nomral', 'nrmal'], lower(trim(resultado))), 'Normal',     in(['bajo peso', 'bAJO pESO', 'bajo eso'], lower(trim(resultado))), 'Bajo Peso',     in(['desnutrición leve', 'desnutriicón leve', 'desnutrición lvee', 'desnutricion leve'], lower(trim(resultado))), 'Desnutrición Leve',     initCap(trim(resultado)) )) ~> derivedColumn1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          control_pediatrico_id as integer,",
+				"          ci_nino as string,",
+				"          ci_madre as string,",
+				"          establecimiento_id as integer,",
+				"          nro_control as integer,",
+				"          fecha_control as date,",
+				"          peso_nino_kg as decimal(6,2),",
+				"          talla_nino_cm as decimal(6,2),",
+				"          vacuna_aplicada as string,",
+				"          resultado as string,",
+				"          fecha_carga as timestamp",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          control_pediatrico_id,",
+				"          ci_nino,",
+				"          ci_madre,",
+				"          establecimiento_id,",
+				"          nro_control,",
+				"          fecha_control,",
+				"          peso_nino_kg,",
+				"          talla_nino_cm,",
+				"          vacuna_aplicada,",
+				"          resultado",
+				"     )) ~> sink1"
+			]
+		}
+	}
+}

@@ -1,5 +1,5 @@
 {
-	"name": "df_silver",
+	"name": "df_silver_establecimientos",
 	"properties": {
 		"folder": {
 			"name": "silver"
@@ -8,14 +8,121 @@
 		"typeProperties": {
 			"sources": [
 				{
+					"dataset": {
+						"referenceName": "bronze_bja_establecimientos_salud",
+						"type": "DatasetReference"
+					},
 					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "bronze_sup_establecimientos",
+						"type": "DatasetReference"
+					},
+					"name": "source2"
 				}
 			],
-			"sinks": [],
-			"transformations": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "silver_establecimientos",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "union1"
+				}
+			],
 			"scriptLines": [
-				"source(allowSchemaDrift: true,",
-				"     validateSchema: false) ~> source1"
+				"source(output(",
+				"          establecimiento_id as string,",
+				"          codigo_snis as string,",
+				"          nombre as string,",
+				"          tipo as string,",
+				"          nivel_atencion as string,",
+				"          municipio as string,",
+				"          departamento as string,",
+				"          red_salud as string,",
+				"          estado as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT \\n    TRIM(establecimiento_id) AS establecimiento_id,\\n    TRIM(codigo_snis) AS codigo_snis,\\n    TRIM(nombre) AS nombre,\\n    TRIM(tipo) AS tipo,\\n    TRIM(nivel_atencion) AS nivel_atencion,\\n    TRIM(municipio) AS municipio,\\n    TRIM(departamento) AS departamento,\\n    TRIM(red_salud) AS red_salud,\\n    TRIM(estado) AS estado\\nFROM bronze.tbl_establecimientos_salud\\nWHERE establecimiento_id IS NOT NULL AND TRIM(establecimiento_id) <> \\'\\'',",
+				"     format: 'query') ~> source1",
+				"source(output(",
+				"          establecimiento_id as string,",
+				"          codigo_snis as string,",
+				"          nombre as string,",
+				"          tipo as string,",
+				"          nivel_atencion as string,",
+				"          municipio as string,",
+				"          departamento as string,",
+				"          red_salud as string,",
+				"          estado as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source2",
+				"union1 derive(nombre = initCap(nombre),",
+				"          tipo = initCap(tipo),",
+				"          establecimiento_id = toInteger(establecimiento_id),",
+				"          nivel_atencion = case(in(['primer nivel', '1er nivel', 'primer_nivel'], lower(trim(nivel_atencion))), 'Primer Nivel',     in(['segundo nivel', '2do nivel', 'segundo_nivel'], lower(trim(nivel_atencion))), 'Segundo Nivel',     in(['tercer nivel', '3er nivel', 'tercer_nivel'], lower(trim(nivel_atencion))), 'Tercer Nivel',     initCap(trim(nivel_atencion)) ),",
+				"          municipio = initCap(municipio),",
+				"          departamento = case(",
+				"    in(['lpz', 'la paz', 'la_paz', 'lp'], lower(trim(departamento))), 'La Paz',",
+				"    in(['cbba', 'cochabamba', 'cb'], lower(trim(departamento))), 'Cochabamba',",
+				"    in(['scz', 'santa cruz', 'sta cruz', 'sc'], lower(trim(departamento))), 'Santa Cruz',",
+				"    in(['or', 'oruro'], lower(trim(departamento))), 'Oruro',",
+				"    in(['tj', 'tarija'], lower(trim(departamento))), 'Tarija',",
+				"    in(['pt', 'potosí'], lower(trim(departamento))), 'Potosí',",
+				"    in(['ch', 'chuquisaca'], lower(trim(departamento))), 'Chuquisaca',",
+				"    in(['bn', 'beni'], lower(trim(departamento))), 'Beni',",
+				"    in(['pd', 'pando'], lower(trim(departamento))), 'Pando',",
+				"    initCap(trim(departamento))",
+				"),",
+				"          estado = iif(in(['activo', 'act', '1', 'true', 'si'], lower(trim(toString(estado)))), 'Activo', 'Inactivo')) ~> derivedColumn1",
+				"source1, source2 union(byName: true)~> union1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          establecimiento_id as integer,",
+				"          codigo_snis as string,",
+				"          nombre as string,",
+				"          tipo as string,",
+				"          nivel_atencion as string,",
+				"          municipio as string,",
+				"          departamento as string,",
+				"          red_salud as string,",
+				"          estado as string,",
+				"          fecha_carga as timestamp",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          establecimiento_id,",
+				"          codigo_snis,",
+				"          nombre,",
+				"          tipo,",
+				"          nivel_atencion,",
+				"          municipio,",
+				"          departamento,",
+				"          red_salud,",
+				"          estado",
+				"     )) ~> sink1"
 			]
 		}
 	}

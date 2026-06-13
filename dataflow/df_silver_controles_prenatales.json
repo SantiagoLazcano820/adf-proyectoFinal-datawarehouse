@@ -1,0 +1,138 @@
+{
+	"name": "df_silver_controles_prenatales",
+	"properties": {
+		"folder": {
+			"name": "silver"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "bronze_bja_controles_prenatales",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "bronze_sup_controles",
+						"type": "DatasetReference"
+					},
+					"name": "source2"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "silver_controles_prenatales",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "union1"
+				},
+				{
+					"name": "derivedColumn1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          control_id as string,",
+				"          ci_beneficiaria as string,",
+				"          establecimiento_id as string,",
+				"          nro_control as string,",
+				"          fecha_control as string,",
+				"          semana_gestacion as string,",
+				"          peso_madre_kg as string,",
+				"          presion_arterial as string,",
+				"          resultado_medico as string,",
+				"          origen_sistema as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT \\n    TRIM(control_prenatal_id) AS control_id,\\n    TRIM(ci_beneficiaria) AS ci_beneficiaria,\\n    TRIM(establecimiento_id) AS establecimiento_id,\\n    TRIM(nro_control) AS nro_control,\\n    TRIM(fecha_control) AS fecha_control,\\n    TRIM(semana_gestacion) AS semana_gestacion,\\n    TRIM(peso_madre_kg) AS peso_madre_kg,\\n    TRIM(presion_arterial) AS presion_arterial,\\n    TRIM(resultado) AS resultado_medico,\\n    \\'BJA\\' AS origen_sistema\\nFROM bronze.tbl_bja_controles_prenatales\\nWHERE control_prenatal_id IS NOT NULL AND TRIM(control_prenatal_id) <> \\'\\'',",
+				"     format: 'query') ~> source1",
+				"source(output(",
+				"          control_id as string,",
+				"          ci_beneficiaria as string,",
+				"          establecimiento_id as string,",
+				"          nro_control as string,",
+				"          fecha_control as string,",
+				"          semana_gestacion as string,",
+				"          peso_madre_kg as string,",
+				"          presion_arterial as string,",
+				"          resultado_medico as string,",
+				"          origen_sistema as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT \\n    TRIM(control_id) AS control_id,\\n    TRIM(ci_beneficiaria) AS ci_beneficiaria,\\n    TRIM(establecimiento_id) AS establecimiento_id,\\n    TRIM(nro_control) AS nro_control,\\n    TRIM(fecha_control) AS fecha_control,\\n    TRIM(semana_gestacion) AS semana_gestacion,\\n    TRIM(peso_madre_kg) AS peso_madre_kg,\\n    TRIM(presion_arterial) AS presion_arterial,\\n    CAST(NULL AS VARCHAR(500)) AS resultado_medico, \\n    \\'SUC\\' AS origen_sistema\\nFROM bronze.tbl_sup_controles\\nWHERE control_id IS NOT NULL AND TRIM(control_id) <> \\'\\'',",
+				"     format: 'query') ~> source2",
+				"source1, source2 union(byName: true)~> union1",
+				"union1 derive(control_id = toInteger(control_id),",
+				"          establecimiento_id = toInteger(establecimiento_id),",
+				"          nro_control = toInteger(nro_control),",
+				"          fecha_control = coalesce(",
+				"    toDate(fecha_control, 'yyyy-MM-dd'),     ",
+				"    toDate(fecha_control, 'dd/MM/yyyy'),     ",
+				"    toDate(fecha_control, 'MM-dd-yyyy'),     ",
+				"    toDate(fecha_control, 'yyyy/MM/dd'),    ",
+				"    toDate(fecha_control, \"dd 'de' MMMM 'de' yyyy\"),",
+				"    toDate('1900-01-01', 'yyyy-MM-dd')",
+				"),",
+				"          semana_gestacion = iifNull(toInteger(semana_gestacion), 0),",
+				"          peso_madre_kg = toDecimal(peso_madre_kg),",
+				"          resultado_medico = case(",
+				"    isNull(resultado_medico) || trim(toString(resultado_medico)) == 'NULL', 'No Evaluado',",
+				"    in(['normal', 'noraml', 'nrmal', 'nomal', 'norrmal', 'normaal'], lower(trim(toString(resultado_medico)))), 'Normal',",
+				"    in(['riesgo bajo', 'riesgoo bajo'], lower(trim(toString(resultado_medico)))), 'Riesgo Bajo',",
+				"    in(['riesgo moderado', 'riiesgo moderado'], lower(trim(toString(resultado_medico)))), 'Riesgo Moderado',",
+				"    in(['riesgo alto', 'riesgoo alto'], lower(trim(toString(resultado_medico)))), 'Riesgo Alto',",
+				"    initCap(trim(toString(resultado_medico)))",
+				"),",
+				"          presion_arterial = iifNull(regexReplace(trim(presion_arterial), '\\\\s+', ''), 'No Registrada')) ~> derivedColumn1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          control_id as integer,",
+				"          ci_beneficiaria as string,",
+				"          establecimiento_id as integer,",
+				"          nro_control as integer,",
+				"          fecha_control as date,",
+				"          semana_gestacion as integer,",
+				"          peso_madre_kg as decimal(6,2),",
+				"          presion_arterial as string,",
+				"          resultado_medico as string,",
+				"          origen_sistema as string,",
+				"          fecha_carga as timestamp",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          control_id,",
+				"          ci_beneficiaria,",
+				"          establecimiento_id,",
+				"          nro_control,",
+				"          fecha_control,",
+				"          semana_gestacion,",
+				"          peso_madre_kg,",
+				"          presion_arterial,",
+				"          resultado_medico,",
+				"          origen_sistema",
+				"     )) ~> sink1"
+			]
+		}
+	}
+}

@@ -1,0 +1,114 @@
+{
+	"name": "df_silver_inscripciones",
+	"properties": {
+		"folder": {
+			"name": "silver"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "bronze_bja_inscripciones",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "bronze_sup_inscripciones",
+						"type": "DatasetReference"
+					},
+					"name": "source2"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "silver_inscripciones",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "union1"
+				},
+				{
+					"name": "derivedColumn1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          inscripcion_id as string,",
+				"          ci_beneficiaria as string,",
+				"          establecimiento_id as string,",
+				"          fecha_inscripcion as string,",
+				"          semana_gestacion as string,",
+				"          origen_sistema as string,",
+				"          estado as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT \\n    TRIM(inscripcion_id) AS inscripcion_id,\\n    TRIM(ci_beneficiaria) AS ci_beneficiaria,\\n    TRIM(establecimiento_id) AS establecimiento_id,\\n    TRIM(fecha_inscripcion) AS fecha_inscripcion,\\n    TRIM(semana_gestacion) AS semana_gestacion,\\n    \\'BJA\\' AS origen_sistema,\\n    TRIM(estado) AS estado\\nFROM bronze.tbl_bja_inscripciones\\nWHERE inscripcion_id IS NOT NULL AND TRIM(inscripcion_id) <> \\'\\'',",
+				"     format: 'query') ~> source1",
+				"source(output(",
+				"          inscripcion_id as string,",
+				"          ci_beneficiaria as string,",
+				"          establecimiento_id as string,",
+				"          fecha_inscripcion as string,",
+				"          semana_gestacion as string,",
+				"          origen_sistema as string,",
+				"          estado as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT \\n    TRIM(inscripcion_id) AS inscripcion_id,\\n    TRIM(ci_beneficiaria) AS ci_beneficiaria,\\n    TRIM(establecimiento_id) AS establecimiento_id,\\n    TRIM(fecha_inscripcion) AS fecha_inscripcion,\\n    TRIM(semana_gestacion) AS semana_gestacion,\\n    \\'SUC\\' AS origen_sistema,\\n    TRIM(estado) AS estado\\nFROM bronze.tbl_sup_inscripciones\\nWHERE inscripcion_id IS NOT NULL AND TRIM(inscripcion_id) <> \\'\\'',",
+				"     format: 'query') ~> source2",
+				"source1, source2 union(byName: true)~> union1",
+				"union1 derive(inscripcion_id = toInteger(inscripcion_id),",
+				"          establecimiento_id = toInteger(establecimiento_id),",
+				"          fecha_inscripcion = coalesce(toDate(fecha_inscripcion, 'yyyy-MM-dd'),     toDate(fecha_inscripcion, 'dd/MM/yyyy'),     toDate(fecha_inscripcion, 'MM-dd-yyyy'),     toDate(fecha_inscripcion, 'yyyy/MM/dd'),    toDate(fecha_inscripcion, \"dd 'de' MMMM 'de' yyyy\")),",
+				"          semana_gestacion = iifNull(toInteger(semana_gestacion), 0),",
+				"          estado = case(",
+				"    in(['activa', 'activo', 'habilitado'], lower(trim(estado))), 'Activa',",
+				"    in(['inactiva', 'inactivo', 'baja'], lower(trim(estado))), 'Inactiva',",
+				"    in(['completada', 'completo'], lower(trim(estado))), 'Completada',",
+				"    initCap(trim(estado))",
+				")) ~> derivedColumn1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          inscripcion_id as integer,",
+				"          ci_beneficiaria as string,",
+				"          establecimiento_id as integer,",
+				"          fecha_inscripcion as date,",
+				"          semana_gestacion as integer,",
+				"          origen_sistema as string,",
+				"          estado as string,",
+				"          fecha_carga as timestamp",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          inscripcion_id,",
+				"          ci_beneficiaria,",
+				"          establecimiento_id,",
+				"          fecha_inscripcion,",
+				"          semana_gestacion,",
+				"          origen_sistema,",
+				"          estado",
+				"     )) ~> sink1"
+			]
+		}
+	}
+}
