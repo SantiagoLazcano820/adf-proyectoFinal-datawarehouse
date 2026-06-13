@@ -15,12 +15,26 @@
 					"name": "source1"
 				}
 			],
-			"sinks": [],
-			"transformations": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "silver_entregas_subsidio",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				}
+			],
 			"scriptLines": [
 				"source(output(",
 				"          entrega_id as string,",
 				"          boleta_id as string,",
+				"          nro_boleta as string,",
+				"          control_id as string,",
 				"          ci_beneficiaria as string,",
 				"          establecimiento_id as string,",
 				"          paquete_id as string,",
@@ -28,12 +42,67 @@
 				"          fecha_entrega as string,",
 				"          lote_produccion as string,",
 				"          peso_paquete_kg as string,",
-				"          fecha_proxima_entrega as string",
+				"          fecha_proxima_entrega as string,",
+				"          estado_boleta as string",
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     format: 'table') ~> source1"
+				"     query: 'SELECT \\n    TRIM(e.entrega_id) AS entrega_id,\\n    TRIM(e.boleta_id) AS boleta_id,\\n    TRIM(b.nro_boleta) AS nro_boleta,\\n    TRIM(b.control_id) AS control_id,\\n    TRIM(e.ci_beneficiaria) AS ci_beneficiaria,\\n    TRIM(e.establecimiento_id) AS establecimiento_id,\\n    TRIM(e.paquete_id) AS paquete_id,\\n    TRIM(e.paquete_nombre) AS paquete_nombre,\\n    TRIM(e.fecha_entrega) AS fecha_entrega,\\n    TRIM(e.lote_produccion) AS lote_produccion,\\n    TRIM(e.peso_paquete_kg) AS peso_paquete_kg,\\n    TRIM(e.fecha_proxima_entrega) AS fecha_proxima_entrega,\\n    TRIM(b.estado) AS estado_boleta\\nFROM bronze.tbl_sup_entregas e\\nLEFT JOIN bronze.tbl_sup_boletas b ON TRIM(e.boleta_id) = TRIM(b.boleta_id)\\nWHERE e.entrega_id IS NOT NULL AND TRIM(e.entrega_id) <> \\'\\'',",
+				"     format: 'query') ~> source1",
+				"source1 derive(entrega_id = toInteger(entrega_id),",
+				"          boleta_id = toInteger(boleta_id),",
+				"          control_id = toInteger(control_id),",
+				"          establecimiento_id = toInteger(establecimiento_id),",
+				"          paquete_id = toInteger(paquete_id),",
+				"          fecha_entrega = coalesce(    toDate(fecha_entrega, 'yyyy-MM-dd'),         toDate(fecha_proxima_entrega, 'yyyy/MM/dd'),    toDate(fecha_entrega, 'dd/MM/yyyy'),         toDate(fecha_entrega, 'MM-dd-yyyy'),         toDate(fecha_entrega, 'yyyy/MM/dd'),        toDate(fecha_entrega, \"dd 'de' MMMM 'de' yyyy\"),    toDate(fecha_entrega, 'yyyy/MM/dd'),    toDate('1900-01-01', 'yyyy-MM-dd')),",
+				"          fecha_proxima_entrega = coalesce(    toDate(fecha_proxima_entrega, 'yyyy-MM-dd'),         toDate(fecha_proxima_entrega, 'dd/MM/yyyy'),         toDate(fecha_proxima_entrega, 'MM-dd-yyyy'),         toDate(fecha_proxima_entrega, 'yyyy/MM/dd'),        toDate(fecha_proxima_entrega, \"dd 'de' MMMM 'de' yyyy\"),    toDate('1900-01-01', 'yyyy-MM-dd')),",
+				"          peso_paquete_kg = iifNull(toDecimal(regexReplace(toString(peso_paquete_kg), '[^0-9.]', '')), 0.0),",
+				"          ci_beneficiaria = upper(regexReplace(toString(ci_beneficiaria), '[^a-zA-Z0-9]', '')),",
+				"          paquete_nombre = initCap(regexReplace(trim(paquete_nombre), '\\\\s+', ' ')),",
+				"          lote_produccion = iif(     isNull(lote_produccion) || toString(lote_produccion) == 'NULL' || trim(toString(lote_produccion)) == '',     'SIN LOTE',     upper(trim(toString(lote_produccion))) ),",
+				"          estado_boleta = case(     in(['canjeada', 'canjeado', 'entregado', '1'], lower(trim(toString(estado_boleta)))), 'Canjeada',     in(['anulado', 'devuelto', '0'], lower(trim(toString(estado_boleta)))), 'Anulada',     initCap(trim(toString(estado_boleta))) )) ~> derivedColumn1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          entrega_id as integer,",
+				"          boleta_id as integer,",
+				"          nro_boleta as string,",
+				"          control_id as integer,",
+				"          ci_beneficiaria as string,",
+				"          establecimiento_id as integer,",
+				"          paquete_id as integer,",
+				"          paquete_nombre as string,",
+				"          fecha_entrega as date,",
+				"          lote_produccion as string,",
+				"          peso_paquete_kg as decimal(10,2),",
+				"          fecha_proxima_entrega as date,",
+				"          estado_boleta as string,",
+				"          fecha_carga as timestamp",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          entrega_id,",
+				"          boleta_id,",
+				"          nro_boleta,",
+				"          control_id,",
+				"          ci_beneficiaria,",
+				"          establecimiento_id,",
+				"          paquete_id,",
+				"          paquete_nombre,",
+				"          fecha_entrega,",
+				"          lote_produccion,",
+				"          peso_paquete_kg,",
+				"          fecha_proxima_entrega,",
+				"          estado_boleta",
+				"     )) ~> sink1"
 			]
 		}
 	}
