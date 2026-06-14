@@ -69,7 +69,7 @@
 				"     query: 'SELECT \\n    TRIM(inscripcion_id) AS inscripcion_id,\\n    TRIM(ci_beneficiaria) AS ci_beneficiaria,\\n    TRIM(establecimiento_id) AS establecimiento_id,\\n    TRIM(fecha_inscripcion) AS fecha_inscripcion,\\n    TRIM(semana_gestacion) AS semana_gestacion,\\n    \\'SUC\\' AS origen_sistema,\\n    TRIM(estado) AS estado\\nFROM bronze.tbl_sup_inscripciones\\nWHERE inscripcion_id IS NOT NULL AND TRIM(inscripcion_id) <> \\'\\'',",
 				"     format: 'query') ~> source2",
 				"source1, source2 union(byName: true)~> union1",
-				"union1 derive(inscripcion_id = toInteger(inscripcion_id),",
+				"union1 derive(inscripcion_id = iif(origen_sistema == 'SUC', toInteger(inscripcion_id) + 10000000, toInteger(inscripcion_id)),",
 				"          establecimiento_id = toInteger(establecimiento_id),",
 				"          fecha_inscripcion = coalesce(toDate(fecha_inscripcion, 'yyyy-MM-dd'),     toDate(fecha_inscripcion, 'dd/MM/yyyy'),     toDate(fecha_inscripcion, 'MM-dd-yyyy'),     toDate(fecha_inscripcion, 'yyyy/MM/dd'),    toDate(fecha_inscripcion, \"dd 'de' MMMM 'de' yyyy\")),",
 				"          semana_gestacion = iifNull(toInteger(semana_gestacion), 0),",

@@ -37,6 +37,9 @@
 				},
 				{
 					"name": "union1"
+				},
+				{
+					"name": "aggregate1"
 				}
 			],
 			"scriptLines": [
@@ -91,7 +94,16 @@
 				"),",
 				"          estado = iif(in(['activo', 'act', '1', 'true', 'si'], lower(trim(toString(estado)))), 'Activo', 'Inactivo')) ~> derivedColumn1",
 				"source1, source2 union(byName: true)~> union1",
-				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"derivedColumn1 aggregate(groupBy(establecimiento_id),",
+				"     codigo_snis = first(codigo_snis),",
+				"          nombre = first(nombre),",
+				"          tipo = first(tipo),",
+				"          nivel_atencion = first(nivel_atencion),",
+				"          municipio = first(municipio),",
+				"          departamento = first(departamento),",
+				"          red_salud = first(red_salud),",
+				"          estado = first(estado)) ~> aggregate1",
+				"aggregate1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          establecimiento_id as integer,",

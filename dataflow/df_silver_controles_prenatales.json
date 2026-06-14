@@ -75,7 +75,7 @@
 				"     query: 'SELECT \\n    TRIM(control_id) AS control_id,\\n    TRIM(ci_beneficiaria) AS ci_beneficiaria,\\n    TRIM(establecimiento_id) AS establecimiento_id,\\n    TRIM(nro_control) AS nro_control,\\n    TRIM(fecha_control) AS fecha_control,\\n    TRIM(semana_gestacion) AS semana_gestacion,\\n    TRIM(peso_madre_kg) AS peso_madre_kg,\\n    TRIM(presion_arterial) AS presion_arterial,\\n    CAST(NULL AS VARCHAR(500)) AS resultado_medico, \\n    \\'SUC\\' AS origen_sistema\\nFROM bronze.tbl_sup_controles\\nWHERE control_id IS NOT NULL AND TRIM(control_id) <> \\'\\'',",
 				"     format: 'query') ~> source2",
 				"source1, source2 union(byName: true)~> union1",
-				"union1 derive(control_id = toInteger(control_id),",
+				"union1 derive(control_id = iif(origen_sistema == 'SUC', toInteger(control_id) + 10000000, toInteger(control_id)),",
 				"          establecimiento_id = toInteger(establecimiento_id),",
 				"          nro_control = toInteger(nro_control),",
 				"          fecha_control = coalesce(",
