@@ -22,11 +22,11 @@
 				"precision": 10
 			},
 			{
-				"name": "nombre_establecimiento",
+				"name": "codigo_snis",
 				"type": "varchar"
 			},
 			{
-				"name": "codigo_snis",
+				"name": "nombre_establecimiento",
 				"type": "varchar"
 			},
 			{

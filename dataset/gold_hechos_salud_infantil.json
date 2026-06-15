@@ -27,22 +27,12 @@
 				"precision": 10
 			},
 			{
-				"name": "madre_key",
-				"type": "int",
-				"precision": 10
-			},
-			{
 				"name": "establecimiento_key",
 				"type": "int",
 				"precision": 10
 			},
 			{
 				"name": "control_pediatrico_id",
-				"type": "int",
-				"precision": 10
-			},
-			{
-				"name": "parto_id",
 				"type": "int",
 				"precision": 10
 			},
@@ -64,27 +54,11 @@
 				"scale": 2
 			},
 			{
-				"name": "peso_nacimiento_kg",
-				"type": "decimal",
-				"precision": 6,
-				"scale": 2
-			},
-			{
-				"name": "talla_nacimiento_cm",
-				"type": "decimal",
-				"precision": 6,
-				"scale": 2
-			},
-			{
 				"name": "vacuna_aplicada",
 				"type": "varchar"
 			},
 			{
 				"name": "estado_nutricional_nino",
-				"type": "varchar"
-			},
-			{
-				"name": "tipo_parto",
 				"type": "varchar"
 			}
 		],

@@ -6,11 +6,263 @@
 		},
 		"type": "MappingDataFlow",
 		"typeProperties": {
-			"sources": [],
-			"sinks": [],
-			"transformations": [],
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "silver_controles_prenatales",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "gold_dim_tiempo",
+						"type": "DatasetReference"
+					},
+					"name": "source2"
+				},
+				{
+					"dataset": {
+						"referenceName": "gold_dim_persona",
+						"type": "DatasetReference"
+					},
+					"name": "source3"
+				},
+				{
+					"dataset": {
+						"referenceName": "gold_dim_establecimiento",
+						"type": "DatasetReference"
+					},
+					"name": "source4"
+				},
+				{
+					"dataset": {
+						"referenceName": "silver_pagos",
+						"type": "DatasetReference"
+					},
+					"name": "source5"
+				},
+				{
+					"dataset": {
+						"referenceName": "silver_entregas_subsidio",
+						"type": "DatasetReference"
+					},
+					"name": "source6"
+				},
+				{
+					"dataset": {
+						"referenceName": "gold_dim_catalogo_paquetes",
+						"type": "DatasetReference"
+					},
+					"name": "source7"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "gold_hechos_salud_materna",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "lookup1"
+				},
+				{
+					"name": "lookup2"
+				},
+				{
+					"name": "lookup3"
+				},
+				{
+					"name": "lookup4"
+				},
+				{
+					"name": "lookup5"
+				},
+				{
+					"name": "lookup6"
+				},
+				{
+					"name": "select1"
+				}
+			],
 			"scriptLines": [
-				""
+				"source(output(",
+				"          control_id as integer,",
+				"          ci_beneficiaria as string,",
+				"          establecimiento_id as integer,",
+				"          nro_control as integer,",
+				"          fecha_control as date,",
+				"          semana_gestacion as integer,",
+				"          peso_madre_kg as decimal(6,2),",
+				"          presion_arterial as string,",
+				"          resultado_medico as string,",
+				"          origen_sistema as string,",
+				"          fecha_carga as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source1",
+				"source(output(",
+				"          fecha_key as integer,",
+				"          fecha as date,",
+				"          dia_semana as integer,",
+				"          nombre_dia as string,",
+				"          dia_mes as integer,",
+				"          mes as integer,",
+				"          nombre_mes as string,",
+				"          trimestre as integer,",
+				"          anio as integer,",
+				"          es_fin_semana as boolean",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source2",
+				"source(output(",
+				"          persona_key as integer,",
+				"          ci as string,",
+				"          nombres_completos as string,",
+				"          genero as string,",
+				"          fecha_nacimiento as date,",
+				"          municipio_residencia as string,",
+				"          nivel_estudios as string,",
+				"          profesion as string,",
+				"          tipo_parto as string,",
+				"          peso_nacimiento_kg as decimal(6,2),",
+				"          talla_nacimiento_cm as decimal(6,2),",
+				"          inscripcion_id as integer,",
+				"          fecha_inscripcion as date",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source3",
+				"source(output(",
+				"          establecimiento_key as integer,",
+				"          establecimiento_id as integer,",
+				"          codigo_snis as string,",
+				"          nombre_establecimiento as string,",
+				"          tipo as string,",
+				"          nivel_atencion as string,",
+				"          municipio as string,",
+				"          departamento as string,",
+				"          red_salud as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source4",
+				"source(output(",
+				"          pago_id as integer,",
+				"          ci_beneficiaria as string,",
+				"          concepto_pago as string,",
+				"          monto_bs as decimal(10,2),",
+				"          fecha_pago as date,",
+				"          estado_pago as string,",
+				"          canal_pago as string,",
+				"          nro_comprobante as string,",
+				"          fecha_carga as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source5",
+				"source(output(",
+				"          entrega_id as integer,",
+				"          boleta_id as integer,",
+				"          nro_boleta as string,",
+				"          control_id as integer,",
+				"          ci_beneficiaria as string,",
+				"          establecimiento_id as integer,",
+				"          paquete_id as integer,",
+				"          paquete_nombre as string,",
+				"          fecha_entrega as date,",
+				"          lote_produccion as string,",
+				"          peso_paquete_kg as decimal(10,2),",
+				"          fecha_proxima_entrega as date,",
+				"          estado_boleta as string,",
+				"          fecha_carga as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source6",
+				"source(output(",
+				"          paquete_key as integer,",
+				"          paquete_id as integer,",
+				"          nombre_paquete as string,",
+				"          contenido as string,",
+				"          peso_estandar_kg as decimal(10,2),",
+				"          costo_estimado_bs as decimal(10,2)",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source7",
+				"source1, source2 lookup(fecha_control == fecha,",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lookup1",
+				"lookup1, source3 lookup(ci_beneficiaria == ci,",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lookup2",
+				"lookup2, source4 lookup(source1@establecimiento_id == source4@establecimiento_id,",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lookup3",
+				"lookup3, source5 lookup(source1@ci_beneficiaria == source5@ci_beneficiaria,",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lookup4",
+				"lookup4, source6 lookup(source1@ci_beneficiaria == source6@ci_beneficiaria,",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lookup5",
+				"lookup5, source7 lookup(source6@paquete_id == source7@paquete_id,",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lookup6",
+				"lookup6 select(mapColumn(",
+				"          each(match(/* All input columns */ true()),",
+				"               /* Input name */ $$ = $$)",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          hecho_materno_key as integer,",
+				"          fecha_key as integer,",
+				"          beneficiaria_key as integer,",
+				"          establecimiento_key as integer,",
+				"          paquete_key as integer,",
+				"          control_id as integer,",
+				"          semana_gestacion as integer,",
+				"          nro_control_prenatal as integer,",
+				"          peso_madre_kg as decimal(6,2),",
+				"          presion_arterial as string,",
+				"          clasificacion_riesgo_madre as string,",
+				"          monto_pago_bs as decimal(10,2),",
+				"          estado_boleta_subsidio as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          each(match(/* All input columns */ true()),",
+				"               /* Input name */ $$ = $$)",
+				"     )) ~> sink1"
 			]
 		}
 	}
