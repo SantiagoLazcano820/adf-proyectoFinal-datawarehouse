@@ -56,10 +56,6 @@
 			{
 				"name": "vacuna_aplicada",
 				"type": "varchar"
-			},
-			{
-				"name": "estado_nutricional_nino",
-				"type": "varchar"
 			}
 		],
 		"typeProperties": {

@@ -6,11 +6,182 @@
 		},
 		"type": "MappingDataFlow",
 		"typeProperties": {
-			"sources": [],
-			"sinks": [],
-			"transformations": [],
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "silver_controles_pediatricos",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "gold_dim_tiempo",
+						"type": "DatasetReference"
+					},
+					"name": "source2"
+				},
+				{
+					"dataset": {
+						"referenceName": "gold_dim_persona",
+						"type": "DatasetReference"
+					},
+					"name": "source3"
+				},
+				{
+					"dataset": {
+						"referenceName": "gold_dim_establecimiento",
+						"type": "DatasetReference"
+					},
+					"name": "source4"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "gold_hechos_salud_infantil",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "lookup1"
+				},
+				{
+					"name": "lookup2"
+				},
+				{
+					"name": "lookup3"
+				},
+				{
+					"name": "select1"
+				}
+			],
 			"scriptLines": [
-				""
+				"source(output(",
+				"          control_pediatrico_id as integer,",
+				"          ci_nino as string,",
+				"          ci_madre as string,",
+				"          establecimiento_id as integer,",
+				"          nro_control as integer,",
+				"          fecha_control as date,",
+				"          peso_nino_kg as decimal(6,2),",
+				"          talla_nino_cm as decimal(6,2),",
+				"          vacuna_aplicada as string,",
+				"          resultado as string,",
+				"          fecha_carga as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source1",
+				"source(output(",
+				"          fecha_key as integer,",
+				"          fecha as date,",
+				"          dia_semana as integer,",
+				"          nombre_dia as string,",
+				"          dia_mes as integer,",
+				"          mes as integer,",
+				"          nombre_mes as string,",
+				"          trimestre as integer,",
+				"          anio as integer,",
+				"          es_fin_semana as boolean",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source2",
+				"source(output(",
+				"          persona_key as integer,",
+				"          ci as string,",
+				"          nombres_completos as string,",
+				"          genero as string,",
+				"          fecha_nacimiento as date,",
+				"          municipio_residencia as string,",
+				"          nivel_estudios as string,",
+				"          profesion as string,",
+				"          tipo_parto as string,",
+				"          peso_nacimiento_kg as decimal(6,2),",
+				"          talla_nacimiento_cm as decimal(6,2),",
+				"          inscripcion_id as integer,",
+				"          fecha_inscripcion as date",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source3",
+				"source(output(",
+				"          establecimiento_key as integer,",
+				"          establecimiento_id as integer,",
+				"          codigo_snis as string,",
+				"          nombre_establecimiento as string,",
+				"          tipo as string,",
+				"          nivel_atencion as string,",
+				"          municipio as string,",
+				"          departamento as string,",
+				"          red_salud as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source4",
+				"source1, source2 lookup(fecha_control == fecha,",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lookup1",
+				"lookup1, source3 lookup(ci_nino == ci,",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lookup2",
+				"lookup2, source4 lookup(source1@establecimiento_id == source4@establecimiento_id,",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lookup3",
+				"lookup3 select(mapColumn(",
+				"          control_pediatrico_id,",
+				"          nro_control_pediatrico = nro_control,",
+				"          peso_nino_kg,",
+				"          talla_nino_cm,",
+				"          vacuna_aplicada,",
+				"          fecha_key,",
+				"          nino_key = persona_key,",
+				"          establecimiento_key",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          hecho_infantil_key as integer,",
+				"          fecha_key as integer,",
+				"          nino_key as integer,",
+				"          establecimiento_key as integer,",
+				"          control_pediatrico_id as integer,",
+				"          nro_control_pediatrico as integer,",
+				"          peso_nino_kg as decimal(6,2),",
+				"          talla_nino_cm as decimal(6,2),",
+				"          vacuna_aplicada as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          fecha_key,",
+				"          nino_key,",
+				"          establecimiento_key,",
+				"          control_pediatrico_id,",
+				"          nro_control_pediatrico,",
+				"          peso_nino_kg,",
+				"          talla_nino_cm,",
+				"          vacuna_aplicada",
+				"     )) ~> sink1"
 			]
 		}
 	}
