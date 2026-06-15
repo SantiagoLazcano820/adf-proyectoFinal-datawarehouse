@@ -62,10 +62,6 @@
 				"type": "varchar"
 			},
 			{
-				"name": "clasificacion_riesgo_madre",
-				"type": "varchar"
-			},
-			{
 				"name": "monto_pago_bs",
 				"type": "decimal",
 				"precision": 10,
