@@ -6,11 +6,69 @@
 		},
 		"type": "MappingDataFlow",
 		"typeProperties": {
-			"sources": [],
-			"sinks": [],
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "silver_personas",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "gold_dim_persona",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
 			"transformations": [],
 			"scriptLines": [
-				""
+				"source(output(",
+				"          ci as string,",
+				"          nombres_completos as string,",
+				"          genero as string,",
+				"          fecha_nacimiento as date,",
+				"          municipio_residencia as string,",
+				"          nivel_estudios as string,",
+				"          profesion as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT \\n    ci,\\n    CONCAT(MAX(nombres), \\' \\', ISNULL(MAX(ap_paterno), \\'\\'), \\' \\', ISNULL(MAX(ap_materno), \\'\\')) AS nombres_completos,\\n    MAX(genero) AS genero,\\n    MAX(fecha_nac) AS fecha_nacimiento,\\n    MAX(municipio_residencia) AS municipio_residencia,\\n    MAX(nivel_estudios) AS nivel_estudios,\\n    MAX(profesion) AS profesion\\nFROM silver.tbl_personas\\nWHERE ci IS NOT NULL\\nGROUP BY ci',",
+				"     format: 'query') ~> source1",
+				"source1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          persona_key as integer,",
+				"          ci as string,",
+				"          nombres_completos as string,",
+				"          genero as string,",
+				"          fecha_nacimiento as date,",
+				"          municipio_residencia as string,",
+				"          nivel_estudios as string,",
+				"          profesion as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          ci,",
+				"          nombres_completos,",
+				"          genero,",
+				"          fecha_nacimiento,",
+				"          municipio_residencia,",
+				"          nivel_estudios,",
+				"          profesion",
+				"     )) ~> sink1"
 			]
 		}
 	}

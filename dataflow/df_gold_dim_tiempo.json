@@ -6,11 +6,77 @@
 		},
 		"type": "MappingDataFlow",
 		"typeProperties": {
-			"sources": [],
-			"sinks": [],
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "silver_inscripciones",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "gold_dim_tiempo",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
 			"transformations": [],
 			"scriptLines": [
-				""
+				"source(output(",
+				"          fecha_key as integer,",
+				"          fecha as date,",
+				"          dia_semana as integer,",
+				"          nombre_dia as string,",
+				"          dia_mes as integer,",
+				"          mes as integer,",
+				"          nombre_mes as string,",
+				"          trimestre as integer,",
+				"          anio as integer,",
+				"          es_fin_semana as boolean",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT \\n    CAST(YEAR(fecha_unica) * 10000 + MONTH(fecha_unica) * 100 + DAY(fecha_unica) AS INT) AS fecha_key,\\n    CAST(fecha_unica AS DATE) AS fecha,\\n    DATEPART(WEEKDAY, fecha_unica) AS dia_semana,\\n    DATENAME(WEEKDAY, fecha_unica) AS nombre_dia,\\n    DAY(fecha_unica) AS dia_mes,\\n    MONTH(fecha_unica) AS mes,\\n    DATENAME(MONTH, fecha_unica) AS nombre_mes,\\n    DATEPART(QUARTER, fecha_unica) AS trimestre,\\n    YEAR(fecha_unica) AS anio,\\n    CAST(CASE WHEN DATEPART(WEEKDAY, fecha_unica) IN (6, 7) THEN 1 ELSE 0 END AS BIT) AS es_fin_semana\\nFROM (\\n    SELECT fecha_inscripcion AS fecha_unica FROM silver.tbl_inscripciones WHERE fecha_inscripcion IS NOT NULL\\n    UNION\\n    SELECT fecha_control FROM silver.tbl_controles_prenatales WHERE fecha_control IS NOT NULL\\n    UNION\\n    SELECT fecha_control FROM silver.tbl_controles_pediatricos WHERE fecha_control IS NOT NULL\\n    UNION\\n    SELECT fecha_parto FROM silver.tbl_partos WHERE fecha_parto IS NOT NULL\\n    UNION\\n    SELECT fecha_pago FROM silver.tbl_pagos WHERE fecha_pago IS NOT NULL\\n    UNION\\n    SELECT fecha_entrega FROM silver.tbl_entregas_subsidio WHERE fecha_entrega IS NOT NULL\\n) AS todas_las_fechas\\nGROUP BY fecha_unica',",
+				"     format: 'query') ~> source1",
+				"source1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          fecha_key as integer,",
+				"          fecha as date,",
+				"          dia_semana as integer,",
+				"          nombre_dia as string,",
+				"          dia_mes as integer,",
+				"          mes as integer,",
+				"          nombre_mes as string,",
+				"          trimestre as integer,",
+				"          anio as integer,",
+				"          es_fin_semana as boolean",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          fecha_key,",
+				"          fecha,",
+				"          dia_semana,",
+				"          nombre_dia,",
+				"          dia_mes,",
+				"          mes,",
+				"          nombre_mes,",
+				"          trimestre,",
+				"          anio,",
+				"          es_fin_semana",
+				"     )) ~> sink1"
 			]
 		}
 	}
