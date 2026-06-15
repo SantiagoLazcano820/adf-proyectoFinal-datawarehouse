@@ -1,0 +1,96 @@
+{
+	"name": "gold_hechos_salud_infantil",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "dw_subsidio",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "gold"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "hecho_infantil_key",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "fecha_key",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "nino_key",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "madre_key",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "establecimiento_key",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "control_pediatrico_id",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "parto_id",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "nro_control_pediatrico",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "peso_nino_kg",
+				"type": "decimal",
+				"precision": 6,
+				"scale": 2
+			},
+			{
+				"name": "talla_nino_cm",
+				"type": "decimal",
+				"precision": 6,
+				"scale": 2
+			},
+			{
+				"name": "peso_nacimiento_kg",
+				"type": "decimal",
+				"precision": 6,
+				"scale": 2
+			},
+			{
+				"name": "talla_nacimiento_cm",
+				"type": "decimal",
+				"precision": 6,
+				"scale": 2
+			},
+			{
+				"name": "vacuna_aplicada",
+				"type": "varchar"
+			},
+			{
+				"name": "estado_nutricional_nino",
+				"type": "varchar"
+			},
+			{
+				"name": "tipo_parto",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "gold",
+			"table": "hechos_salud_infantil"
+		}
+	}
+}

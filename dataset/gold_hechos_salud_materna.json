@@ -1,0 +1,104 @@
+{
+	"name": "gold_hechos_salud_materna",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "dw_subsidio",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "gold"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "hecho_materno_key",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "fecha_key",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "beneficiaria_key",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "establecimiento_key",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "paquete_key",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "inscripcion_id",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "control_id",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "entrega_id",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "semana_gestacion",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "nro_control_prenatal",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "peso_madre_kg",
+				"type": "decimal",
+				"precision": 6,
+				"scale": 2
+			},
+			{
+				"name": "peso_paquete_kg",
+				"type": "decimal",
+				"precision": 10,
+				"scale": 2
+			},
+			{
+				"name": "monto_pago_bs",
+				"type": "decimal",
+				"precision": 10,
+				"scale": 2
+			},
+			{
+				"name": "presion_arterial",
+				"type": "varchar"
+			},
+			{
+				"name": "clasificacion_riesgo_madre",
+				"type": "varchar"
+			},
+			{
+				"name": "estado_boleta_subsidio",
+				"type": "varchar"
+			},
+			{
+				"name": "origen_sistema",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "gold",
+			"table": "hechos_salud_materna"
+		}
+	}
+}
