@@ -239,7 +239,7 @@
 					"scripts": [
 						{
 							"type": "NonQuery",
-							"text": "DELETE FROM gold.hechos_salud_infantil\nDELETE FROM gold.hechos_salud_materna\nDELETE FROM gold.hechos_entregas_subsidio\nDELETE FROM gold.dim_catalogo_paquetes\nDELETE FROM gold.dim_persona\nDELETE FROM gold.dim_establecimiento\nDELETE FROM gold.dim_tiempo"
+							"text": "DELETE FROM gold.hechos_salud_infantil\nDELETE FROM gold.hechos_salud_materna\nDELETE FROM gold.hechos_entregas_subsidio\nDELETE FROM gold.dim_catalogo_paquetes\nDELETE FROM gold.dim_persona\nDELETE FROM gold.dim_establecimiento\nDELETE FROM gold.dim_tiempo\n\nSET IDENTITY_INSERT gold.dim_persona ON;\nINSERT INTO gold.dim_persona (persona_key, ci, nombres_completos, genero, fecha_nacimiento)\nVALUES (-1, '0', 'MADRE NO REGISTRADA', 'DESCONOCIDO', '1900-01-01');\nSET IDENTITY_INSERT gold.dim_persona OFF;"
 						}
 					],
 					"scriptBlockExecutionTimeout": "02:00:00"
