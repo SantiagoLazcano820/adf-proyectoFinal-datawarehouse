@@ -32,6 +32,27 @@
 				"precision": 10
 			},
 			{
+				"name": "parto_id",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "tipo_parto",
+				"type": "varchar"
+			},
+			{
+				"name": "peso_nacimiento_kg",
+				"type": "decimal",
+				"precision": 6,
+				"scale": 2
+			},
+			{
+				"name": "talla_nacimiento_cm",
+				"type": "decimal",
+				"precision": 6,
+				"scale": 2
+			},
+			{
 				"name": "control_pediatrico_id",
 				"type": "int",
 				"precision": 10
@@ -42,13 +63,13 @@
 				"precision": 10
 			},
 			{
-				"name": "peso_nino_kg",
+				"name": "peso_control_kg",
 				"type": "decimal",
 				"precision": 6,
 				"scale": 2
 			},
 			{
-				"name": "talla_nino_cm",
+				"name": "talla_control_cm",
 				"type": "decimal",
 				"precision": 6,
 				"scale": 2

@@ -68,6 +68,12 @@
 				"scale": 2
 			},
 			{
+				"name": "peso_paquete_entregado_kg",
+				"type": "decimal",
+				"precision": 10,
+				"scale": 2
+			},
+			{
 				"name": "estado_boleta_subsidio",
 				"type": "varchar"
 			}
