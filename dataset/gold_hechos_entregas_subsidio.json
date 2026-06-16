@@ -54,11 +54,6 @@
 				"type": "decimal",
 				"precision": 10,
 				"scale": 2
-			},
-			{
-				"name": "cantidad_paquetes_entregados",
-				"type": "int",
-				"precision": 10
 			}
 		],
 		"typeProperties": {

@@ -23,13 +23,6 @@
 				},
 				{
 					"dataset": {
-						"referenceName": "silver_entregas_subsidio",
-						"type": "DatasetReference"
-					},
-					"name": "source3"
-				},
-				{
-					"dataset": {
 						"referenceName": "gold_dim_tiempo",
 						"type": "DatasetReference"
 					},
@@ -48,13 +41,6 @@
 						"type": "DatasetReference"
 					},
 					"name": "source6"
-				},
-				{
-					"dataset": {
-						"referenceName": "gold_dim_catalogo_paquetes",
-						"type": "DatasetReference"
-					},
-					"name": "source7"
 				}
 			],
 			"sinks": [
@@ -71,9 +57,6 @@
 					"name": "lookup1"
 				},
 				{
-					"name": "lookup2"
-				},
-				{
 					"name": "lookup3"
 				},
 				{
@@ -81,9 +64,6 @@
 				},
 				{
 					"name": "lookup5"
-				},
-				{
-					"name": "lookup6"
 				},
 				{
 					"name": "select1"
@@ -125,26 +105,6 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> source2",
-				"source(output(",
-				"          entrega_id as integer,",
-				"          boleta_id as integer,",
-				"          nro_boleta as string,",
-				"          control_id as integer,",
-				"          ci_beneficiaria as string,",
-				"          establecimiento_id as integer,",
-				"          paquete_id as integer,",
-				"          paquete_nombre as string,",
-				"          fecha_entrega as date,",
-				"          lote_produccion as string,",
-				"          peso_paquete_kg as decimal(10,2),",
-				"          fecha_proxima_entrega as date,",
-				"          estado_boleta as string,",
-				"          fecha_carga as timestamp",
-				"     ),",
-				"     allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     format: 'table') ~> source3",
 				"source(output(",
 				"          fecha_key as integer,",
 				"          fecha as date,",
@@ -192,29 +152,12 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> source6",
-				"source(output(",
-				"          paquete_key as integer,",
-				"          paquete_id as integer,",
-				"          nombre_paquete as string,",
-				"          contenido as string,",
-				"          peso_estandar_kg as decimal(10,2),",
-				"          costo_estimado_bs as decimal(10,2)",
-				"     ),",
-				"     allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     format: 'table') ~> source7",
 				"source1, source2 lookup(source1@ci_beneficiaria == source2@ci_beneficiaria",
 				"     && fecha_control == fecha_pago,",
 				"     multiple: false,",
 				"     pickup: 'any',",
 				"     broadcast: 'auto')~> lookup1",
-				"lookup1, source3 lookup(source1@ci_beneficiaria == source3@ci_beneficiaria",
-				"     && fecha_control == fecha_entrega,",
-				"     multiple: false,",
-				"     pickup: 'any',",
-				"     broadcast: 'auto')~> lookup2",
-				"lookup2, source4 lookup(fecha_control == fecha,",
+				"lookup1, source4 lookup(fecha_control == fecha,",
 				"     multiple: false,",
 				"     pickup: 'any',",
 				"     broadcast: 'auto')~> lookup3",
@@ -226,23 +169,16 @@
 				"     multiple: false,",
 				"     pickup: 'any',",
 				"     broadcast: 'auto')~> lookup5",
-				"lookup5, source7 lookup(source3@paquete_id == source7@paquete_id,",
-				"     multiple: false,",
-				"     pickup: 'any',",
-				"     broadcast: 'auto')~> lookup6",
-				"lookup6 select(mapColumn(",
-				"          control_id = source1@control_id,",
+				"lookup5 select(mapColumn(",
+				"          control_id,",
 				"          nro_control_prenatal = nro_control,",
 				"          semana_gestacion,",
 				"          peso_madre_kg,",
 				"          presion_arterial,",
 				"          monto_pago_bs = monto_bs,",
-				"          peso_paquete_entregado_kg = peso_paquete_kg,",
-				"          estado_boleta_subsidio = estado_boleta,",
 				"          fecha_key,",
 				"          beneficiaria_key = persona_key,",
-				"          establecimiento_key,",
-				"          paquete_key",
+				"          establecimiento_key",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
@@ -273,15 +209,12 @@
 				"          fecha_key,",
 				"          beneficiaria_key,",
 				"          establecimiento_key,",
-				"          paquete_key,",
 				"          control_id,",
 				"          semana_gestacion,",
 				"          nro_control_prenatal,",
 				"          peso_madre_kg,",
 				"          presion_arterial,",
-				"          monto_pago_bs,",
-				"          peso_paquete_entregado_kg,",
-				"          estado_boleta_subsidio",
+				"          monto_pago_bs",
 				"     )) ~> sink1"
 			]
 		}
