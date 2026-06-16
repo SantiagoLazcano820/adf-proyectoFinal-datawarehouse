@@ -39,7 +39,7 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     query: 'SELECT DISTINCT\\n    establecimiento_id,\\n    codigo_snis,\\n    nombre AS nombre_establecimiento,\\n    tipo,\\n    nivel_atencion,\\n    municipio,\\n    departamento,\\n    red_salud\\nFROM silver.tbl_establecimientos\\nWHERE establecimiento_id IS NOT NULL',",
+				"     query: 'SELECT DISTINCT\\n    establecimiento_id,\\n    codigo_snis,\\n    nombre AS nombre_establecimiento,\\n    tipo,\\n    nivel_atencion,\\n    municipio,\\n    departamento,\\n    red_salud    \\nFROM silver.tbl_establecimientos\\nWHERE establecimiento_id IS NOT NULL',",
 				"     format: 'query') ~> source1",
 				"source1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",

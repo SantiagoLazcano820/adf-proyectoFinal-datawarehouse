@@ -36,7 +36,7 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     query: 'SELECT \\n    cp.paquete_id,\\n    MAX(cp.nombre) AS nombre_paquete,\\n    MAX(cp.contenido) AS contenido,\\n    MAX(cp.peso_estandar_kg) AS peso_estandar_kg,\\n    MAX(cp.costo_estimado_bs) AS costo_estimado_bs\\nFROM silver.tbl_catalogo_paquetes cp\\nLEFT JOIN silver.tbl_entregas_subsidio es ON cp.paquete_id = es.paquete_id\\nWHERE cp.paquete_id IS NOT NULL\\nGROUP BY cp.paquete_id',",
+				"     query: 'SELECT \\n    paquete_id,\\n    nombre AS nombre_paquete,\\n    contenido,\\n    peso_estandar_kg,\\n    costo_estimado_bs\\nFROM silver.tbl_catalogo_paquetes\\nWHERE paquete_id IS NOT NULL',",
 				"     format: 'query') ~> source1",
 				"source1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
