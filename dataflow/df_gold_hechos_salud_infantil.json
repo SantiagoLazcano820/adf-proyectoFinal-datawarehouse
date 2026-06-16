@@ -184,7 +184,12 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
-				"select1 derive(nino_key = iifNull(nino_key, -1)) ~> derivedColumn1",
+				"select1 derive(nino_key = iifNull(nino_key, -1),",
+				"          fecha_key = iifNull(fecha_key, -1),",
+				"          parto_id = iifNull(parto_id, -1),",
+				"          tipo_parto = iifNull(tipo_parto, \"Sin registro\"),",
+				"          peso_nacimiento_kg = iifNull(peso_nacimiento_kg, toDecimal(0.00, 10, 2)),",
+				"          talla_nacimiento_cm = iifNull(talla_nacimiento_cm, toDecimal(0.00, 10, 2))) ~> derivedColumn1",
 				"derivedColumn1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
@@ -221,7 +226,7 @@
 				"          control_pediatrico_id,",
 				"          nro_control_pediatrico,",
 				"          peso_control_kg,",
-				"          talla_control_cm,",
+				"          talla_control_cm = talla_nacimiento_cm,",
 				"          vacuna_aplicada",
 				"     )) ~> sink1"
 			]
