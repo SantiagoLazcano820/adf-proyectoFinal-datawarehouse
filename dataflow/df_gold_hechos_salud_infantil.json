@@ -69,7 +69,7 @@
 					"name": "select1"
 				},
 				{
-					"name": "derivedColumn1"
+					"name": "derivedColumn2"
 				}
 			],
 			"scriptLines": [
@@ -168,7 +168,7 @@
 				"     multiple: false,",
 				"     pickup: 'any',",
 				"     broadcast: 'auto')~> lookup4",
-				"lookup4 select(mapColumn(",
+				"derivedColumn2 select(mapColumn(",
 				"          control_pediatrico_id,",
 				"          nro_control_pediatrico = nro_control,",
 				"          peso_control_kg = peso_nino_kg,",
@@ -184,13 +184,13 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
-				"select1 derive(nino_key = iifNull(nino_key, -1),",
+				"lookup4 derive(persona_key = iifNull(persona_key, -1),",
 				"          fecha_key = iifNull(fecha_key, -1),",
 				"          parto_id = iifNull(parto_id, -1),",
 				"          tipo_parto = iifNull(tipo_parto, \"Sin registro\"),",
 				"          peso_nacimiento_kg = iifNull(peso_nacimiento_kg, toDecimal(0.00, 10, 2)),",
-				"          talla_nacimiento_cm = iifNull(talla_nacimiento_cm, toDecimal(0.00, 10, 2))) ~> derivedColumn1",
-				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"          talla_nacimiento_cm = iifNull(talla_nacimiento_cm, toDecimal(0.00, 10, 2))) ~> derivedColumn2",
+				"select1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          hecho_infantil_key as integer,",

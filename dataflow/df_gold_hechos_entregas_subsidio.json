@@ -69,7 +69,7 @@
 					"name": "select1"
 				},
 				{
-					"name": "derivedColumn1"
+					"name": "derivedColumn2"
 				}
 			],
 			"scriptLines": [
@@ -168,7 +168,7 @@
 				"     multiple: false,",
 				"     pickup: 'any',",
 				"     broadcast: 'auto')~> lookup4",
-				"lookup4 select(mapColumn(",
+				"derivedColumn2 select(mapColumn(",
 				"          entrega_id,",
 				"          nro_boleta_subsidio = nro_boleta,",
 				"          peso_paquete_entregado_kg = peso_paquete_kg,",
@@ -180,9 +180,9 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
-				"select1 derive(beneficiaria_key = iifNull(beneficiaria_key, -1),",
-				"          fecha_key = iifNull(fecha_key, -1)) ~> derivedColumn1",
-				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"lookup4 derive(persona_key = iifNull(persona_key, -1),",
+				"          fecha_key = iifNull(fecha_key, -1)) ~> derivedColumn2",
+				"select1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          hecho_entrega_key as integer,",

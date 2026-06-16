@@ -69,7 +69,7 @@
 					"name": "select1"
 				},
 				{
-					"name": "derivedColumn1"
+					"name": "derivedColumn2"
 				}
 			],
 			"scriptLines": [
@@ -168,7 +168,7 @@
 				"     multiple: false,",
 				"     pickup: 'any',",
 				"     broadcast: 'auto')~> lookup5",
-				"lookup5 select(mapColumn(",
+				"derivedColumn2 select(mapColumn(",
 				"          control_id,",
 				"          nro_control_prenatal = nro_control,",
 				"          semana_gestacion,",
@@ -181,10 +181,10 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
-				"select1 derive(beneficiaria_key = iifNull(beneficiaria_key, -1),",
-				"          monto_pago_bs = iifNull(monto_pago_bs, toDecimal(0.00, 10, 2)),",
-				"          fecha_key = iifNull(fecha_key, -1)) ~> derivedColumn1",
-				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"lookup5 derive(persona_key = iifNull(persona_key, -1),",
+				"          monto_bs = iifNull(monto_bs, toDecimal(0.00, 10, 2)),",
+				"          fecha_key = iifNull(fecha_key, -1)) ~> derivedColumn2",
+				"select1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          hecho_materno_key as integer,",
