@@ -58,7 +58,7 @@
 				"          fecha_entrega = coalesce(    toDate(fecha_entrega, 'yyyy-MM-dd'),         toDate(fecha_proxima_entrega, 'yyyy/MM/dd'),    toDate(fecha_entrega, 'dd/MM/yyyy'),         toDate(fecha_entrega, 'MM-dd-yyyy'),         toDate(fecha_entrega, 'yyyy/MM/dd'),        toDate(fecha_entrega, \"dd 'de' MMMM 'de' yyyy\"),    toDate(fecha_entrega, 'yyyy/MM/dd'),    toDate('1900-01-01', 'yyyy-MM-dd')),",
 				"          fecha_proxima_entrega = coalesce(    toDate(fecha_proxima_entrega, 'yyyy-MM-dd'),         toDate(fecha_proxima_entrega, 'dd/MM/yyyy'),         toDate(fecha_proxima_entrega, 'MM-dd-yyyy'),         toDate(fecha_proxima_entrega, 'yyyy/MM/dd'),        toDate(fecha_proxima_entrega, \"dd 'de' MMMM 'de' yyyy\"),    toDate('1900-01-01', 'yyyy-MM-dd')),",
 				"          peso_paquete_kg = iifNull(toDecimal(regexReplace(toString(peso_paquete_kg), '[^0-9.]', '')), 0.0),",
-				"          ci_beneficiaria = upper(regexReplace(toString(ci_beneficiaria), '[^a-zA-Z0-9]', '')),",
+				"          ci_beneficiaria = regexReplace(toString(ci_beneficiaria), '[^0-9]', ''),",
 				"          paquete_nombre = initCap(regexReplace(trim(paquete_nombre), '\\\\s+', ' ')),",
 				"          lote_produccion = iif(     isNull(lote_produccion) || toString(lote_produccion) == 'NULL' || trim(toString(lote_produccion)) == '',     'SIN LOTE',     upper(trim(toString(lote_produccion))) ),",
 				"          estado_boleta = case(     in(['canjeada', 'canjeado', 'entregado', '1'], lower(trim(toString(estado_boleta)))), 'Canjeada',     in(['anulado', 'devuelto', '0'], lower(trim(toString(estado_boleta)))), 'Anulada',     initCap(trim(toString(estado_boleta))) )) ~> derivedColumn1",

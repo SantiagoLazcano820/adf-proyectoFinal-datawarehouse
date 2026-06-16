@@ -101,7 +101,7 @@
 				"    initCap(trim(toString(resultado_medico)))",
 				"),",
 				"          presion_arterial = iifNull(regexReplace(trim(presion_arterial), '\\\\s+', ''), 'No Registrada'),",
-				"          ci_beneficiaria = regexReplace(upper(regexReplace(toString(ci_beneficiaria), '[^a-zA-Z0-9]', '')), '^([A-Z]{2})([0-9]+)$', '$2$1')) ~> derivedColumn1",
+				"          ci_beneficiaria = regexReplace(toString(ci_beneficiaria), '[^0-9]', '')) ~> derivedColumn1",
 				"derivedColumn1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
