@@ -226,7 +226,7 @@
 				"          control_pediatrico_id,",
 				"          nro_control_pediatrico,",
 				"          peso_control_kg,",
-				"          talla_control_cm = talla_nacimiento_cm,",
+				"          talla_control_cm,",
 				"          vacuna_aplicada",
 				"     )) ~> sink1"
 			]
